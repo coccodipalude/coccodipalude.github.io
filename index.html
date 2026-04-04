@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mētis — Automazione per le imprese italiane</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+:root {
+  --bg: #070707;
+  --bg2: #0e0e0e;
+  --w: #f0ebe1;
+  --g: #b8963e;
+  --g2: #d4af60;
+  --gdim: rgba(184,150,62,.1);
+  --gline: rgba(184,150,62,.16);
+  --mu: rgba(240,235,225,.36);
+  --mi: rgba(240,235,225,.62);
+  --bo: rgba(240,235,225,.07);
+}
+
+body {
+  background: var(--bg); color: var(--w);
+  font-family: 'DM Mono', monospace; font-weight: 300;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden; cursor: none;
+}
+
+#c1 {
+  position: fixed; z-index: 9999; pointer-events: none;
+  width: 5px; height: 5px; background: var(--g); border-radius: 50%;
+  transform: translate(-50%,-50%); mix-blend-mode: screen;
+  transition: width .18s, height .18s;
+}
+#c2 {
+  position: fixed; z-index: 9998; pointer-events: none;
+  width: 30px; height: 30px;
+  border: 1px solid rgba(184,150,62,.28); border-radius: 50%;
+  transform: translate(-50%,-50%);
+}
+
+/* NAV */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 800;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 36px 72px;
+  border-bottom: 1px solid transparent;
+  transition: padding .5s, background .5s, border-color .4s;
+}
+nav.s { padding: 22px 72px; background: rgba(7,7,7,.93); backdrop-filter: blur(20px); border-color: var(--bo); }
+.logo { font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; font-weight: 300; letter-spacing: .2em; color: var(--w); text-decoration: none; }
+.logo em { color: var(--g); font-style: normal; }
+.nl { display: flex; gap: 48px; list-style: none; }
+.nl a { font-size: .58rem; letter-spacing: .24em; text-transform: uppercase; color: var(--mu); text-decoration: none; transition: color .2s; }
+.nl a:hover { color: var(--g); }
+.nb { font-family: 'DM Mono', monospace; font-size: .58rem; letter-spacing: .2em; text-transform: uppercase; color: var(--bg); background: var(--g); border: none; padding: 10px 26px; cursor: none; text-decoration: none; transition: background .2s; }
+.nb:hover { background: var(--g2); }
+
+/* HERO */
+.hero { min-height: 100vh; display: grid; align-items: center; padding: 140px 72px 100px; position: relative; overflow: hidden; }
+.hbg {
+  position: absolute; inset: 0; pointer-events: none;
+  background-image: linear-gradient(var(--bo) 1px, transparent 1px), linear-gradient(90deg, var(--bo) 1px, transparent 1px);
+  background-size: 80px 80px;
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, black, transparent);
+}
+.hglow { position: absolute; pointer-events: none; top: 35%; left: 45%; transform: translate(-50%,-50%); width: 1000px; height: 600px; background: radial-gradient(ellipse, rgba(184,150,62,.05) 0%, transparent 65%); }
+.hi { max-width: 1100px; position: relative; z-index: 1; }
+
+.ey { font-size: .56rem; letter-spacing: .34em; text-transform: uppercase; color: var(--g); display: flex; align-items: center; gap: 16px; margin-bottom: 52px; opacity: 0; animation: fu .8s ease forwards .15s; }
+.ey::before { content: ''; width: 36px; height: 1px; background: var(--g); }
+
+h1 { font-family: 'Cormorant Garamond', serif; font-size: clamp(4.5rem, 10vw, 10rem); font-weight: 300; line-height: .9; letter-spacing: -.03em; opacity: 0; animation: fu 1s ease forwards .35s; }
+h1 em { font-style: italic; color: var(--g); }
+
+.hbody { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: flex-end; margin-top: 64px; opacity: 0; animation: fu .9s ease forwards .7s; }
+.hdesc { font-size: .7rem; line-height: 2.1; color: var(--mi); max-width: 380px; }
+.hright { display: flex; flex-direction: column; align-items: flex-end; gap: 22px; }
+
+.btn { font-family: 'DM Mono', monospace; font-size: .6rem; letter-spacing: .2em; text-transform: uppercase; color: var(--bg); background: var(--g); border: none; padding: 15px 38px; cursor: none; text-decoration: none; position: relative; overflow: hidden; display: inline-block; }
+.btn::before { content: ''; position: absolute; inset: 0; background: var(--g2); transform: translateX(-101%); transition: transform .32s ease; }
+.btn:hover::before { transform: translateX(0); }
+.btn span { position: relative; z-index: 1; }
+.hemail { font-size: .58rem; letter-spacing: .12em; color: var(--mu); text-decoration: none; transition: color .2s; }
+.hemail:hover { color: var(--g); }
+
+.hs { display: grid; grid-template-columns: repeat(4,1fr); border-top: 1px solid var(--bo); margin-top: 100px; opacity: 0; animation: fi .8s ease forwards 1.1s; }
+.hn { padding: 32px 0; border-right: 1px solid var(--bo); }
+.hn:last-child { border-right: none; }
+.hnn { font-family: 'Cormorant Garamond', serif; font-size: 2.8rem; font-weight: 300; color: var(--g); line-height: 1; display: block; margin-bottom: 6px; }
+.hnl { font-size: .54rem; letter-spacing: .18em; text-transform: uppercase; color: var(--mu); }
+
+/* TICKER */
+.tk { border-top: 1px solid var(--bo); border-bottom: 1px solid var(--bo); background: var(--bg2); padding: 13px 0; overflow: hidden; }
+.tkt { display: flex; width: max-content; animation: tk 30s linear infinite; }
+.tki { font-size: .56rem; letter-spacing: .24em; text-transform: uppercase; color: var(--mu); padding: 0 52px; border-right: 1px solid var(--bo); white-space: nowrap; flex-shrink: 0; display: flex; align-items: center; gap: 18px; }
+.tki::before { content: '◆'; color: var(--g); font-size: .38rem; }
+
+/* SHARED */
+.wrap { max-width: 1200px; margin: 0 auto; padding: 0 72px; }
+.lbl { font-size: .54rem; letter-spacing: .34em; text-transform: uppercase; color: var(--g); display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+.lbl::before { content: ''; width: 18px; height: 1px; background: var(--g); }
+.hd { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.4rem, 4vw, 3.8rem); font-weight: 300; line-height: 1.05; }
+.hd em { font-style: italic; color: var(--g); }
+
+/* ABOUT */
+.about { padding: 160px 0; border-top: 1px solid var(--bo); }
+.ag { display: grid; grid-template-columns: 5fr 4fr; gap: 120px; align-items: center; }
+.at { margin-top: 36px; }
+.at p { font-size: .7rem; line-height: 2.1; color: var(--mi); }
+.at p+p { margin-top: 20px; }
+.an { display: flex; flex-direction: column; gap: 1px; background: var(--bo); }
+.anu { background: var(--bg); padding: 36px 40px; position: relative; overflow: hidden; transition: background .3s; }
+.anu::after { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: var(--g); transform: scaleY(0); transform-origin: bottom; transition: transform .35s ease; }
+.anu:hover { background: var(--gdim); }
+.anu:hover::after { transform: scaleY(1); }
+.anun { font-family: 'Cormorant Garamond', serif; font-size: 3rem; font-weight: 300; color: var(--g); line-height: 1; display: block; margin-bottom: 5px; }
+.anuл { font-size: .58rem; letter-spacing: .14em; color: var(--mu); }
+
+/* SERVICES */
+.services { padding: 160px 0; border-top: 1px solid var(--bo); }
+.sh { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 64px; }
+.sa { font-size: .62rem; line-height: 1.95; color: var(--mu); max-width: 210px; text-align: right; }
+.sg { display: grid; grid-template-columns: repeat(3,1fr); gap: 1px; background: var(--bo); border: 1px solid var(--bo); }
+.sv { background: var(--bg); padding: 56px 44px; position: relative; overflow: hidden; transition: background .35s; }
+.sv::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: var(--g); transform: scaleX(0); transform-origin: left; transition: transform .4s ease; }
+.sv:hover { background: rgba(184,150,62,.035); }
+.sv:hover::before { transform: scaleX(1); }
+.svn { font-size: .5rem; letter-spacing: .24em; color: var(--g); opacity: .45; display: block; margin-bottom: 52px; }
+.svt { font-family: 'Cormorant Garamond', serif; font-size: 2rem; font-weight: 300; line-height: 1.1; margin-bottom: 18px; }
+.svb { font-size: .63rem; line-height: 1.95; color: var(--mu); }
+.svtag { display: inline-block; margin-top: 32px; font-size: .5rem; letter-spacing: .2em; text-transform: uppercase; color: var(--g); border: 1px solid var(--gline); padding: 5px 14px; }
+
+/* DEMO */
+.demo { padding: 160px 0; border-top: 1px solid var(--bo); }
+.dg { display: grid; grid-template-columns: 1fr 1fr; gap: 120px; align-items: center; }
+.dd { margin-top: 28px; font-size: .68rem; line-height: 2.1; color: var(--mi); }
+.dtabs { display: flex; margin-top: 40px; margin-bottom: 10px; border: 1px solid var(--bo); }
+.dtab { flex: 1; padding: 9px 4px; text-align: center; font-family: 'DM Mono', monospace; font-size: .53rem; letter-spacing: .14em; text-transform: uppercase; color: var(--mu); background: none; border: none; cursor: none; border-right: 1px solid var(--bo); transition: all .22s; }
+.dtab:last-child { border-right: none; }
+.dtab.on { background: var(--gdim); color: var(--g); }
+.dtab:hover:not(.on) { color: var(--mi); }
+.dnote { font-size: .53rem; color: var(--mu); letter-spacing: .1em; line-height: 1.6; }
+
+.pw { position: relative; display: flex; justify-content: center; align-items: center; }
+.pw::before { content: ''; position: absolute; inset: -60px; background: radial-gradient(ellipse, rgba(184,150,62,.06) 0%, transparent 70%); pointer-events: none; }
+.ph { width: 295px; background: #101010; border-radius: 38px; border: 1px solid rgba(255,255,255,.07); overflow: hidden; box-shadow: 0 60px 100px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.03), inset 0 1px 0 rgba(255,255,255,.06); }
+.phbar { background: #181818; padding: 16px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid rgba(255,255,255,.05); }
+.phav { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #25d366 0%, #128c7e 100%); display: flex; align-items: center; justify-content: center; font-size: .95rem; flex-shrink: 0; }
+.phname { font-size: .68rem; color: var(--w); letter-spacing: .03em; }
+.phst { font-size: .52rem; color: #25d366; margin-top: 2px; }
+.phbody { background: #0c1010; padding: 18px 14px; height: 390px; display: flex; flex-direction: column; gap: 9px; overflow-y: auto; scroll-behavior: smooth; }
+.phbody::-webkit-scrollbar { display: none; }
+
+.bb { max-width: 84%; padding: 10px 13px; border-radius: 16px; font-size: .61rem; line-height: 1.58; opacity: 0; transform: translateY(6px); transition: opacity .38s ease, transform .38s ease; }
+.bb.v { opacity: 1; transform: translateY(0); }
+.bb-i { background: #162016; color: #cce8cc; border-bottom-left-radius: 4px; align-self: flex-start; }
+.bb-o { background: #221e0e; color: #f0e4b8; border-bottom-right-radius: 4px; align-self: flex-end; }
+.bbt { font-size: .46rem; color: rgba(255,255,255,.25); display: block; margin-top: 5px; text-align: right; }
+.bb-i .bbt { text-align: left; }
+
+.typ { display: flex; align-items: center; gap: 4px; padding: 11px 13px; background: #162016; border-radius: 16px; border-bottom-left-radius: 4px; align-self: flex-start; opacity: 0; transition: opacity .28s; width: fit-content; }
+.typ.v { opacity: 1; }
+.typ span { width: 5px; height: 5px; background: #25d366; border-radius: 50%; animation: bl 1.1s ease infinite; }
+.typ span:nth-child(2) { animation-delay: .18s; }
+.typ span:nth-child(3) { animation-delay: .36s; }
+@keyframes bl { 0%,60%,100% { transform: translateY(0); opacity:.6; } 30% { transform: translateY(-5px); opacity:1; } }
+
+/* PROCESS */
+.process { padding: 160px 0; border-top: 1px solid var(--bo); }
+.prhead { margin-bottom: 96px; }
+.steps { display: grid; grid-template-columns: repeat(4,1fr); position: relative; }
+.steps::before { content: ''; position: absolute; top: 20px; left: 10%; right: 10%; height: 1px; background: linear-gradient(to right, transparent, var(--gline) 20%, var(--gline) 80%, transparent); }
+.step { padding: 0 28px; text-align: center; }
+.sdot { width: 40px; height: 40px; margin: 0 auto 40px; border: 1px solid var(--gline); border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--bg); position: relative; z-index: 1; font-family: 'Cormorant Garamond', serif; font-size: .95rem; color: var(--g); transition: background .25s, border-color .25s; }
+.step:hover .sdot { background: var(--gdim); border-color: var(--g); }
+.stit { font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; margin-bottom: 14px; }
+.sbody { font-size: .6rem; line-height: 1.95; color: var(--mu); }
+
+/* FAQ */
+.faq { padding: 160px 0; border-top: 1px solid var(--bo); }
+.fgrid { display: grid; grid-template-columns: 2fr 3fr; gap: 120px; align-items: start; }
+.fl p { font-size: .65rem; line-height: 2; color: var(--mu); margin-top: 24px; }
+.fl a { color: var(--g); text-decoration: none; }
+.flist { display: flex; flex-direction: column; }
+.fi { border-bottom: 1px solid var(--bo); }
+.fb { width: 100%; background: none; border: none; cursor: none; display: flex; justify-content: space-between; align-items: center; padding: 26px 0; text-align: left; gap: 20px; font-family: 'Cormorant Garamond', serif; font-size: 1.12rem; color: var(--w); transition: color .22s; }
+.fb:hover { color: var(--g); }
+.fic { width: 20px; height: 20px; flex-shrink: 0; border: 1px solid var(--bo); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: .72rem; color: var(--g); transition: transform .28s, background .28s; }
+.fi.open .fic { transform: rotate(45deg); background: var(--gdim); }
+.fa { font-size: .63rem; line-height: 2; color: var(--mu); max-height: 0; overflow: hidden; transition: max-height .38s ease, padding .38s; }
+.fi.open .fa { max-height: 280px; padding-bottom: 26px; }
+
+/* CTA */
+.cta { padding: 200px 0; border-top: 1px solid var(--bo); text-align: center; position: relative; overflow: hidden; }
+.cta::before { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 800px; height: 500px; background: radial-gradient(ellipse, rgba(184,150,62,.065) 0%, transparent 68%); pointer-events: none; }
+.ctalbl { font-size: .54rem; letter-spacing: .32em; text-transform: uppercase; color: var(--g); margin-bottom: 32px; }
+.ctah { font-family: 'Cormorant Garamond', serif; font-size: clamp(3.8rem, 8.5vw, 8rem); font-weight: 300; line-height: .92; margin-bottom: 40px; }
+.ctah em { font-style: italic; color: var(--g); }
+.ctas { font-size: .68rem; color: var(--mu); margin-bottom: 60px; line-height: 2; }
+.ctam { display: inline-block; margin-top: 32px; font-size: .6rem; letter-spacing: .16em; color: var(--g); text-decoration: none; border-bottom: 1px solid var(--gline); padding-bottom: 2px; transition: border-color .22s; }
+.ctam:hover { border-color: var(--g); }
+
+/* FOOTER */
+footer { border-top: 1px solid var(--bo); padding: 34px 72px; display: grid; grid-template-columns: 1fr 1fr 1fr; align-items: center; }
+.flo { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; letter-spacing: .14em; }
+.flo em { color: var(--g); font-style: normal; }
+.fmi { text-align: center; font-size: .52rem; letter-spacing: .16em; color: var(--mu); }
+.fri { text-align: right; font-size: .52rem; letter-spacing: .1em; color: var(--mu); }
+
+/* ANIM */
+@keyframes fu { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }
+@keyframes fi { from { opacity:0; } to { opacity:1; } }
+@keyframes tk { from { transform:translateX(0); } to { transform:translateX(-50%); } }
+.r { opacity:0; transform:translateY(28px); transition:opacity .85s ease, transform .85s ease; }
+.r.v { opacity:1; transform:translateY(0); }
+
+/* MOBILE */
+@media (max-width:1024px) {
+  nav { padding:24px 28px; }
+  nav.s { padding:18px 28px; }
+  .nl { display:none; }
+  .wrap { padding:0 28px; }
+  .hero { padding:110px 28px 72px; }
+  .hbody { grid-template-columns:1fr; gap:36px; }
+  .hright { align-items:flex-start; }
+  .hs { grid-template-columns:1fr 1fr; }
+  .ag,.dg,.fgrid { grid-template-columns:1fr; gap:64px; }
+  .sh { flex-direction:column; align-items:flex-start; gap:20px; }
+  .sa { text-align:left; }
+  .sg { grid-template-columns:1fr; }
+  .steps { grid-template-columns:repeat(2,1fr); row-gap:52px; }
+  .steps::before { display:none; }
+  footer { grid-template-columns:1fr; gap:12px; text-align:center; padding:32px 28px; }
+  .fri,.fmi { text-align:center; }
+  body { cursor:auto; }
+  #c1,#c2 { display:none; }
+}
+</style>
+</head>
+<body>
+
+<div id="c1"></div>
+<div id="c2"></div>
+
+<nav id="nav">
+  <a href="#" class="logo">Mē<em>tis</em></a>
+  <ul class="nl">
+    <li><a href="#servizi">Servizi</a></li>
+    <li><a href="#demo">Demo</a></li>
+    <li><a href="#processo">Processo</a></li>
+    <li><a href="#faq">FAQ</a></li>
+  </ul>
+  <a href="mailto:pronto.ai.bologna@gmail.com" class="nb">Scrivici</a>
+</nav>
+
+<section class="hero">
+  <div class="hbg"></div>
+  <div class="hglow"></div>
+  <div class="hi">
+    <div class="ey">Bologna · Automazione per le PMI</div>
+    <h1>Il tuo business<br>lavora anche<br><em>di notte.</em></h1>
+    <div class="hbody">
+      <p class="hdesc">Costruiamo chatbot WhatsApp e automazioni email su misura. I tuoi clienti prenotano, ricevono promemoria e tornano — senza che tu risponda manualmente a nessuno.</p>
+      <div class="hright">
+        <a href="mailto:pronto.ai.bologna@gmail.com" class="btn"><span>Scrivici una email</span></a>
+        <a href="mailto:pronto.ai.bologna@gmail.com" class="hemail">pronto.ai.bologna@gmail.com</a>
+      </div>
+    </div>
+    <div class="hs">
+      <div class="hn"><span class="hnn">−40%</span><span class="hnl">No-show in media</span></div>
+      <div class="hn"><span class="hnn">24/7</span><span class="hnl">Risposta automatica</span></div>
+      <div class="hn"><span class="hnn">7 gg</span><span class="hnl">Setup completo</span></div>
+      <div class="hn"><span class="hnn">×0</span><span class="hnl">Ore perse al telefono</span></div>
+    </div>
+  </div>
+</section>
+
+<div class="tk">
+  <div class="tkt">
+    <span class="tki">Chatbot WhatsApp</span><span class="tki">Prenotazioni automatiche</span><span class="tki">Email automation</span><span class="tki">Promemoria appuntamenti</span><span class="tki">Recupero clienti inattivi</span><span class="tki">Recensioni Google</span><span class="tki">Follow-up post-visita</span><span class="tki">Chatbot WhatsApp</span><span class="tki">Prenotazioni automatiche</span><span class="tki">Email automation</span><span class="tki">Promemoria appuntamenti</span><span class="tki">Recupero clienti inattivi</span><span class="tki">Recensioni Google</span><span class="tki">Follow-up post-visita</span>
+  </div>
+</div>
+
+<section class="about">
+  <div class="wrap">
+    <div class="ag">
+      <div>
+        <div class="lbl r">Chi siamo</div>
+        <h2 class="hd r">Sistemi che lavorano.<br><em>Risultati misurabili.</em></h2>
+        <div class="at">
+          <p class="r">Mētis costruisce automazioni su misura per le piccole imprese italiane. Analizziamo il tuo flusso operativo, identifichiamo i processi ripetitivi e li automatizziamo — integrandoci in quello che già usi.</p>
+          <p class="r">Il primo mese è gratuito. Se i numeri non si muovono, ci separiamo senza discutere.</p>
+        </div>
+      </div>
+      <div class="an r">
+        <div class="anu"><span class="anun">€ 0</span><span class="anuл">Costo iniziale</span></div>
+        <div class="anu"><span class="anun">48h</span><span class="anuл">Dal contratto al primo test</span></div>
+        <div class="anu"><span class="anun">∞</span><span class="anuл">Nessun template — tutto su misura</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="services" id="servizi">
+  <div class="wrap">
+    <div class="sh">
+      <div>
+        <div class="lbl r">Servizi</div>
+        <h2 class="hd r">Cosa costruiamo.</h2>
+      </div>
+      <p class="sa r">Ogni soluzione è calibrata sul tuo caso specifico.</p>
+    </div>
+    <div class="sg">
+      <div class="sv r">
+        <span class="svn">01</span>
+        <h3 class="svt">Chatbot<br>WhatsApp</h3>
+        <p class="svb">Gestisce prenotazioni, risponde alle domande frequenti, manda promemoria automatici. Attivo sempre, senza intervento manuale.</p>
+        <span class="svtag">WhatsApp Business API</span>
+      </div>
+      <div class="sv r">
+        <span class="svn">02</span>
+        <h3 class="svt">Email<br>Automation</h3>
+        <p class="svb">Sequenze automatiche su misura: dopo una visita, dopo un appuntamento mancato, dopo mesi di silenzio. Ogni email al momento giusto.</p>
+        <span class="svtag">Email Marketing</span>
+      </div>
+      <div class="sv r">
+        <span class="svn">03</span>
+        <h3 class="svt">Flussi<br>personalizzati</h3>
+        <p class="svb">Liste d'attesa, raccolta recensioni Google, integrazione con il gestionale esistente. Se è un processo ripetitivo, può essere automatizzato.</p>
+        <span class="svtag">Make · GPT-4</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="demo" id="demo">
+  <div class="wrap">
+    <div class="dg">
+      <div>
+        <div class="lbl r">Demo</div>
+        <h2 class="hd r">Così appare<br>ai tuoi <em>clienti.</em></h2>
+        <p class="dd r">Una conversazione reale su WhatsApp. Il chatbot conosce i tuoi orari, gestisce le prenotazioni e manda promemoria — tutto integrato nel tuo numero aziendale.</p>
+        <div class="r">
+          <div class="dtabs">
+            <button class="dtab on" onclick="sw(0,this)">Prenotazione</button>
+            <button class="dtab" onclick="sw(1,this)">Promemoria</button>
+            <button class="dtab" onclick="sw(2,this)">Recupero</button>
+          </div>
+          <p class="dnote" id="dnote">Il cliente contatta lo studio per prenotare</p>
+        </div>
+      </div>
+      <div class="pw r">
+        <div class="ph">
+          <div class="phbar">
+            <div class="phav">🦷</div>
+            <div>
+              <div class="phname">Studio Dentistico Rossi</div>
+              <div class="phst">● online</div>
+            </div>
+          </div>
+          <div class="phbody" id="phb"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="process" id="processo">
+  <div class="wrap">
+    <div class="prhead">
+      <div class="lbl r">Processo</div>
+      <h2 class="hd r">Attivo in una settimana.</h2>
+    </div>
+    <div class="steps">
+      <div class="step r">
+        <div class="sdot">I</div>
+        <h3 class="stit">Scrivici</h3>
+        <p class="sbody">Mandaci una email con due righe sul tuo business. Rispondiamo entro 24 ore con un'analisi del tuo caso.</p>
+      </div>
+      <div class="step r">
+        <div class="sdot">II</div>
+        <h3 class="stit">Proposta</h3>
+        <p class="sbody">Una soluzione specifica per il tuo flusso operativo, con una stima concreta di quello che automatizziamo.</p>
+      </div>
+      <div class="step r">
+        <div class="sdot">III</div>
+        <h3 class="stit">Setup</h3>
+        <p class="sbody">Configuriamo e testiamo tutto noi. Prima di andare live, approvi ogni dettaglio.</p>
+      </div>
+      <div class="step r">
+        <div class="sdot">IV</div>
+        <h3 class="stit">Live</h3>
+        <p class="sbody">Il sistema va online. Monitoriamo i risultati ogni mese e ottimizziamo in base ai dati reali.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="faq" id="faq">
+  <div class="wrap">
+    <div class="fgrid">
+      <div class="fl">
+        <div class="lbl r">FAQ</div>
+        <h2 class="hd r">Domande<br><em>frequenti.</em></h2>
+        <p class="r">Hai altre domande?<br><a href="mailto:pronto.ai.bologna@gmail.com">pronto.ai.bologna@gmail.com</a></p>
+      </div>
+      <div class="flist r">
+        <div class="fi"><button class="fb">Devo avere competenze tecniche?<span class="fic">+</span></button><div class="fa">No. Gestiamo tutto noi — dalla configurazione ai test. Ti chiediamo solo di descriverci come funziona il tuo business.</div></div>
+        <div class="fi"><button class="fb">Quanto tempo ci vuole per andare live?<span class="fic">+</span></button><div class="fa">In media 5–7 giorni dalla conferma. Per setup più semplici siamo spesso operativi in 48 ore.</div></div>
+        <div class="fi"><button class="fb">Come funziona il primo mese gratuito?<span class="fic">+</span></button><div class="fa">Costruiamo e attiviamo il sistema senza costi. Dopo 30 giorni, se i risultati ti soddisfano, passiamo al piano mensile. Altrimenti, nessun addebito.</div></div>
+        <div class="fi"><button class="fb">Funziona con il mio gestionale?<span class="fic">+</span></button><div class="fa">Nella maggior parte dei casi sì. Se usi un software meno diffuso, valutiamo insieme le opzioni di integrazione prima di procedere.</div></div>
+        <div class="fi"><button class="fb">Posso disdire quando voglio?<span class="fic">+</span></button><div class="fa">Sì. Nessun contratto a lungo termine. Disdici in qualsiasi momento con 30 giorni di preavviso, senza penali.</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta" id="contatto">
+  <div class="wrap">
+    <div class="ctalbl r">Inizia oggi</div>
+    <h2 class="ctah r">Il tuo prossimo cliente<br>sta <em>già scrivendo.</em></h2>
+    <p class="ctas r">Mandaci una email. Nessun telefono, nessun modulo.<br>Ti rispondiamo entro 24 ore.</p>
+    <a href="mailto:pronto.ai.bologna@gmail.com" class="btn r"><span>Scrivici ora</span></a>
+    <br>
+    <a href="mailto:pronto.ai.bologna@gmail.com" class="ctam r">pronto.ai.bologna@gmail.com</a>
+  </div>
+</section>
+
+<footer>
+  <div class="flo">Mē<em>tis</em></div>
+  <div class="fmi">Automazione · Bologna</div>
+  <div class="fri">© 2025 Mētis</div>
+</footer>
+
+<script>
+// Cursor
+const c1=document.getElementById('c1'),c2=document.getElementById('c2');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;c1.style.left=mx+'px';c1.style.top=my+'px';});
+(function t(){rx+=(mx-rx)*.1;ry+=(my-ry)*.1;c2.style.left=rx+'px';c2.style.top=ry+'px';requestAnimationFrame(t);})();
+
+// Nav
+window.addEventListener('scroll',()=>document.getElementById('nav').classList.toggle('s',scrollY>48),{passive:true});
+
+// Reveal
+const ro=new IntersectionObserver(es=>{es.forEach(e=>{if(!e.isIntersecting)return;const si=[...e.target.parentElement.querySelectorAll('.r:not(.v)')];const i=Math.max(si.indexOf(e.target),0);setTimeout(()=>e.target.classList.add('v'),i*75);ro.unobserve(e.target);});},{threshold:.07,rootMargin:'0px 0px -36px 0px'});
+document.querySelectorAll('.r').forEach(el=>ro.observe(el));
+
+// FAQ
+document.querySelectorAll('.fb').forEach(b=>b.addEventListener('click',()=>{const it=b.parentElement,op=it.classList.contains('open');document.querySelectorAll('.fi').forEach(i=>i.classList.remove('open'));if(!op)it.classList.add('open');}));
+
+// Chat
+const SC=[
+  {note:'Il cliente contatta lo studio per prenotare',msgs:[
+    {d:'o',t:'Ciao! Vorrei prenotare una pulizia dei denti 🙂',h:'10:02'},
+    {d:'i',t:'Ciao! 👋 Ecco le disponibilità:\n\n📅 Martedì 8 — 9:00 · 11:30 · 16:00\n📅 Giovedì 10 — 10:00 · 14:30\n\nQuale orario preferisci?',h:'10:02'},
+    {d:'o',t:'Giovedì alle 10:00, grazie!',h:'10:03'},
+    {d:'i',t:'✅ Prenotato!\n\n*Giovedì 10 aprile — ore 10:00*\nPulizia dei denti\n\nRiceverai un promemoria domani sera. A presto!',h:'10:03'},
+  ]},
+  {note:'Promemoria automatico inviato 24 ore prima',msgs:[
+    {d:'i',t:'Buongiorno! 🦷 Domani hai appuntamento:\n\n*Giovedì 10 aprile — ore 10:00*\nStudio Rossi · Via Roma 24\n\nRispondi CONFERMO o DISDICO.',h:'09:00'},
+    {d:'o',t:'CONFERMO',h:'09:17'},
+    {d:'i',t:'✅ Perfetto, ti aspettiamo domani! 😊',h:'09:17'},
+  ]},
+  {note:'Il cliente non prenota da 5 mesi',msgs:[
+    {d:'i',t:'Ciao! 👋 Sono passati 5 mesi dalla tua ultima visita.\n\nVuoi che ti trovi un posto questa settimana?',h:'11:00'},
+    {d:'o',t:'Sì dai, mi ero dimenticato!',h:'11:23'},
+    {d:'i',t:'😊 Ecco cosa abbiamo:\n\n📅 Mercoledì 9 — 15:30\n📅 Venerdì 11 — 10:30',h:'11:23'},
+    {d:'o',t:'Venerdì alle 10:30 perfetto',h:'11:25'},
+    {d:'i',t:'✅ Fatto! Venerdì 11 alle 10:30.\nPromemoria il giorno prima. A presto!',h:'11:25'},
+  ]},
+];
+let lt=null;
+function rc(idx){
+  const body=document.getElementById('phb');
+  body.innerHTML='';
+  const msgs=SC[idx].msgs;
+  const ty=Object.assign(document.createElement('div'),{className:'typ'});
+  ty.innerHTML='<span></span><span></span><span></span>';
+  let d=400;
+  msgs.forEach(m=>{
+    if(m.d==='i'){
+      lt=setTimeout(()=>{body.appendChild(ty);ty.classList.add('v');body.scrollTop=9999;lt=setTimeout(()=>{ty.classList.remove('v');setTimeout(()=>{if(ty.parentElement)body.removeChild(ty);ab(body,m);},200);},950);},d);
+      d+=1500;
+    } else {
+      lt=setTimeout(()=>ab(body,m),d);d+=950;
+    }
+  });
+  lt=setTimeout(()=>rc(idx),d+2400);
+}
+function ab(body,m){
+  const b=document.createElement('div');
+  b.className=`bb bb-${m.d==='i'?'i':'o'}`;
+  b.innerHTML=m.t.replace(/\n/g,'<br>').replace(/\*(.*?)\*/g,'<strong>$1</strong>')+`<span class="bbt">${m.h}</span>`;
+  body.appendChild(b);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>b.classList.add('v')));
+  body.scrollTop=9999;
+}
+function sw(idx,btn){
+  clearTimeout(lt);
+  document.querySelectorAll('.dtab').forEach(t=>t.classList.remove('on'));
+  btn.classList.add('on');
+  document.getElementById('dnote').textContent=SC[idx].note;
+  rc(idx);
+}
+new IntersectionObserver((es,o)=>{if(es[0].isIntersecting){rc(0);o.disconnect();}},{threshold:.3}).observe(document.querySelector('.demo'));
+</script>
+</body>
+</html>
